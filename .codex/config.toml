@@ -1,0 +1,23 @@
+model = "gpt-5-codex"
+model_reasoning_effort = "high"
+
+model_instructions_file = "instructions.md"
+
+project_root_markers = [
+    ".git",
+    "gradlew",
+    "mvnw",
+    "pom.xml",
+    "build.gradle"
+]
+
+project_doc_fallback_filenames = [
+    "README.md",
+    "AGENTS.md"
+]
+
+project_doc_max_bytes = 65536
+
+[features]
+memories = true
+multi_agent = true
