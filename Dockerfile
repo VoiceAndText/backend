@@ -15,6 +15,10 @@ WORKDIR /app
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
+RUN chown -R spring:spring /app
+
+USER spring
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
