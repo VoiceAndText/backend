@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: docker-compose.prod.yml
-          target: /home/ubuntu/voiceandtext
+          target: ~/voiceandtext
 
       - name: Create .env on EC2
         uses: appleboy/ssh-action@v1.0.3
