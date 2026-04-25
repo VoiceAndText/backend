@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/voiceandtext
+    username: postgres
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발용
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
