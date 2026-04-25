@@ -1,0 +1,16 @@
+services:
+  app:
+    image: ${IMAGE_NAME}
+    container_name: voiceandtext-app
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: voiceandtext-redis
+    restart: always
