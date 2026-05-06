@@ -1,52 +1,41 @@
 package com.quadcore.voiceandtext.application.auth;
 
+import com.quadcore.voiceandtext.application.auth.port.RefreshTokenStore;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class TokenService {
 
-    private static final String REFRESH_TOKEN_KEY_PREFIX = "refresh_token:";
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RefreshTokenStore refreshTokenStore;
 
-    public TokenService(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
+    public TokenService(RefreshTokenStore refreshTokenStore) {
+        this.refreshTokenStore = refreshTokenStore;
     }
 
     /**
-     * Refresh Token을 Redis에 저장
+     * Refresh Token을 저장소에 저장
      */
     public void saveRefreshToken(Long userId, String refreshToken, long expirationMs) {
-        String key = REFRESH_TOKEN_KEY_PREFIX + userId;
-        stringRedisTemplate.opsForValue().set(
-                key,
-                refreshToken,
-                expirationMs,
-                TimeUnit.MILLISECONDS
-        );
+        refreshTokenStore.save(userId, refreshToken, expirationMs);
         log.debug("Saved refresh token for user ID: {}", userId);
     }
 
     /**
-     * Redis에서 Refresh Token 조회
+     * 저장소에서 Refresh Token 조회
      */
     public String getRefreshToken(Long userId) {
-        String key = REFRESH_TOKEN_KEY_PREFIX + userId;
-        String token = stringRedisTemplate.opsForValue().get(key);
+        String token = refreshTokenStore.find(userId);
         log.debug("Retrieved refresh token for user ID: {}", userId);
         return token;
     }
 
     /**
-     * Redis에서 Refresh Token 삭제 (로그아웃/회원탈퇴)
+     * 저장소에서 Refresh Token 삭제 (로그아웃/회원탈퇴)
      */
     public void deleteRefreshToken(Long userId) {
-        String key = REFRESH_TOKEN_KEY_PREFIX + userId;
-        Boolean deleted = stringRedisTemplate.delete(key);
+        boolean deleted = refreshTokenStore.delete(userId);
         log.debug("Deleted refresh token for user ID: {}, result: {}", userId, deleted);
     }
 
@@ -61,7 +50,6 @@ public class TokenService {
      * Refresh Token 존재 여부 확인
      */
     public boolean existsRefreshToken(Long userId) {
-        String key = REFRESH_TOKEN_KEY_PREFIX + userId;
-        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+        return refreshTokenStore.exists(userId);
     }
 }
