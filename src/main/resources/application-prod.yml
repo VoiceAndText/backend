@@ -13,6 +13,8 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      timeout: 60000
 
 cloud:
   aws:
@@ -25,8 +27,18 @@ ai:
   server:
     url: ${AI_SERVER_URL}
 
+# Kakao OAuth Configuration
+kakao:
+  oauth:
+    client-id: ${KAKAO_CLIENT_ID}
+    user-info-uri: https://kapi.kakao.com/v2/user/me
+    client-type: confidential
+
+# JWT Configuration
 jwt:
   secret: ${JWT_SECRET}
+  access-token-expiration: 3600000
+  refresh-token-expiration: 604800000
 
 server:
   port: 8080
