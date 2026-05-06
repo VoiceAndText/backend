@@ -11,6 +11,7 @@ import com.quadcore.voiceandtext.infrastructure.security.JwtTokenProvider;
 import com.quadcore.voiceandtext.presentation.auth.dto.AuthResponse;
 import com.quadcore.voiceandtext.presentation.auth.dto.TokenRefreshResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -183,7 +184,16 @@ public class AuthService {
                 .membershipType(com.quadcore.voiceandtext.domain.user.MembershipType.FREE)
                 .build();
 
-        User savedUser = userRepository.save(newUser);
+        User savedUser;
+        try {
+            savedUser = userRepository.save(newUser);
+        } catch (DataIntegrityViolationException e) {
+            // TOCTOU 경쟁 조건: 동시 요청 시 중복 이메일로 저장 시도
+            throw new BusinessException(
+                    ErrorCode.INVALID_REQUEST,
+                    "이미 가입된 이메일입니다."
+            );
+        }
         log.info("New user registered via Kakao: {}", savedUser.getId());
 
         return savedUser;
