@@ -27,6 +27,15 @@ public class KakaoOAuthService {
      * Kakao access token을 사용하여 사용자 정보 조회
      */
     public KakaoUserInfoResponse getUserInfo(String kakaoAccessToken) {
+        // 입력 검증: 빠른 실패 (Fail-fast)
+        if (kakaoAccessToken == null || kakaoAccessToken.isBlank()) {
+            log.warn("Invalid Kakao access token: token is null or blank");
+            throw new BusinessException(
+                    ErrorCode.INVALID_REQUEST,
+                    "카카오 액세스 토큰이 유효하지 않습니다."
+            );
+        }
+
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + kakaoAccessToken);
