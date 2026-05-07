@@ -1,14 +1,16 @@
 package com.quadcore.voiceandtext.presentation.auth;
 
 import com.quadcore.voiceandtext.application.auth.AuthService;
+import com.quadcore.voiceandtext.common.exception.BusinessException;
+import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.common.response.ApiResponse;
-import com.quadcore.voiceandtext.infrastructure.security.SecurityUtils;
 import com.quadcore.voiceandtext.presentation.auth.dto.AuthResponse;
 import com.quadcore.voiceandtext.presentation.auth.dto.KakaoLoginRequest;
 import com.quadcore.voiceandtext.presentation.auth.dto.TokenRefreshRequest;
 import com.quadcore.voiceandtext.presentation.auth.dto.TokenRefreshResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -46,8 +48,10 @@ public class AuthController {
      * 로그아웃
      */
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout() {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
+        }
         authService.logout(userId);
         return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다."));
     }
@@ -56,8 +60,10 @@ public class AuthController {
      * 회원탈퇴
      */
     @DeleteMapping("/withdraw")
-    public ResponseEntity<ApiResponse<Void>> withdraw() {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public ResponseEntity<ApiResponse<Void>> withdraw(@AuthenticationPrincipal Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
+        }
         authService.withdraw(userId);
         return ResponseEntity.ok(ApiResponse.success("회원탈퇴되었습니다."));
     }
