@@ -55,7 +55,34 @@ public class AuthService {
 
         // 신규 사용자면 회원가입
         if (user == null) {
-            user = registerKakaoUser(kakaoUserInfo);
+            try {
+                user = registerKakaoUser(kakaoUserInfo);
+            } catch (DataIntegrityViolationException e) {
+                // TOCTOU 경쟁 조건: 동시 요청 시 중복 kakaoId로 저장 시도
+                // 제약조건 이름을 확인하여 kakaoId 중복 여부 판단
+                if (isCauseByConstraint(e, "kakao_id")) {
+                    // kakaoId 제약조건 위반 - 다른 요청이 먼저 등록했으므로 재조회
+                    user = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId().toString())
+                            .orElseThrow(() -> new BusinessException(
+                                    ErrorCode.RESOURCE_NOT_FOUND,
+                                    "사용자 정보를 조회할 수 없습니다."
+                            ));
+                    log.info("Recovered from TOCTOU race condition for kakaoId: {}", kakaoUserInfo.getKakaoId());
+                } else if (isCauseByConstraint(e, "email")) {
+                    // 이메일 제약조건 위반
+                    throw new BusinessException(
+                            ErrorCode.INVALID_REQUEST,
+                            "이미 가입된 이메일입니다."
+                    );
+                } else {
+                    // 다른 데이터 무결성 오류
+                    log.error("Unexpected DataIntegrityViolationException during user registration", e);
+                    throw new BusinessException(
+                            ErrorCode.INVALID_REQUEST,
+                            "사용자 등록 중 오류가 발생했습니다."
+                    );
+                }
+            }
         }
 
         // 탈퇴된 사용자면 상태 활성화
@@ -188,14 +215,33 @@ public class AuthService {
         try {
             savedUser = userRepository.save(newUser);
         } catch (DataIntegrityViolationException e) {
-            // TOCTOU 경쟁 조건: 동시 요청 시 중복 이메일로 저장 시도
-            throw new BusinessException(
-                    ErrorCode.INVALID_REQUEST,
-                    "이미 가입된 이메일입니다."
-            );
+            // 이메일 제약조건 위반인 경우만 여기서 처리
+            if (isCauseByConstraint(e, "email")) {
+                throw new BusinessException(
+                        ErrorCode.INVALID_REQUEST,
+                        "이미 가입된 이메일입니다."
+                );
+            }
+            // kakaoId나 다른 제약조건은 호출처(kakaoLogin)에서 처리하도록 propagate
+            throw e;
         }
         log.info("New user registered via Kakao: {}", savedUser.getId());
 
         return savedUser;
+    }
+
+    /**
+     * DataIntegrityViolationException의 원인이 특정 제약조건 위반인지 확인
+     */
+    private boolean isCauseByConstraint(DataIntegrityViolationException e, String constraintKeyword) {
+        Throwable cause = e.getCause();
+        while (cause != null) {
+            String causeMessage = cause.getMessage();
+            if (causeMessage != null && causeMessage.toLowerCase().contains(constraintKeyword.toLowerCase())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
