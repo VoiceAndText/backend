@@ -8,6 +8,7 @@ import com.quadcore.voiceandtext.presentation.auth.dto.AuthResponse;
 import com.quadcore.voiceandtext.presentation.auth.dto.KakaoLoginRequest;
 import com.quadcore.voiceandtext.presentation.auth.dto.TokenRefreshRequest;
 import com.quadcore.voiceandtext.presentation.auth.dto.TokenRefreshResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,7 +40,7 @@ public class AuthController {
      */
     @PostMapping("/token-refresh")
     public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshAccessToken(
-            @RequestBody TokenRefreshRequest request) {
+            @Valid @RequestBody TokenRefreshRequest request) {
         TokenRefreshResponse response = authService.refreshAccessToken(request.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success("토큰이 재발급되었습니다.", response));
     }
