@@ -24,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        log.error("Authentication failed: {}", authException.getMessage());
+        log.error("Authentication failed", authException);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -32,7 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         final ErrorResponse errorResponse = new ErrorResponse(
                 ErrorCode.UNAUTHORIZED.getCode(),
                 "인증이 필요합니다.",
-                authException.getMessage()
+                "유효한 인증 정보가 없습니다."
         );
 
         response.getOutputStream().println(objectMapper.writeValueAsString(errorResponse));
