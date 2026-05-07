@@ -29,6 +29,9 @@ public class KakaoUserInfoResponse {
         @JsonProperty("email")
         private String email;
 
+        @JsonProperty("email_needs_agreement")
+        private Boolean emailNeedsAgreement;
+
         @JsonProperty("profile")
         private Profile profile;
     }
@@ -58,7 +61,13 @@ public class KakaoUserInfoResponse {
     }
 
     public String getEmail() {
-        return kakaoAccount != null ? kakaoAccount.email : null;
+        if (kakaoAccount == null || kakaoAccount.email == null || kakaoAccount.email.isBlank()) {
+            return null;
+        }
+        if (kakaoAccount.emailNeedsAgreement != null && kakaoAccount.emailNeedsAgreement) {
+            return null;
+        }
+        return kakaoAccount.email;
     }
 
     public String getNickname() {
