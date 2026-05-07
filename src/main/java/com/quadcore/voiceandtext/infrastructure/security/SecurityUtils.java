@@ -12,7 +12,11 @@ public class SecurityUtils {
      * 현재 로그인한 사용자의 ID를 반환
      */
     public static Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
         if (principal instanceof Long) {
             return (Long) principal;
         }
