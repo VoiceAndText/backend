@@ -151,7 +151,7 @@ public class AuthService {
         return TokenRefreshResponse.builder()
                 .accessToken(newAccessToken)
                 .tokenType("Bearer")
-                .expiresIn(3600)  // 1 hour
+                .expiresIn(jwtTokenProvider.getAccessTokenExpirationSeconds())
                 .build();
     }
 
