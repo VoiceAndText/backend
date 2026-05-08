@@ -71,20 +71,20 @@ public class KakaoUserInfoResponse {
     }
 
     public String getNickname() {
-        if (kakaoAccount != null && kakaoAccount.profile != null && kakaoAccount.profile.nickname != null) {
+        if (kakaoAccount != null && kakaoAccount.profile != null && kakaoAccount.profile.nickname != null && !kakaoAccount.profile.nickname.trim().isEmpty()) {
             return kakaoAccount.profile.nickname;
         }
-        if (properties != null && properties.nickname != null) {
+        if (properties != null && properties.nickname != null && !properties.nickname.trim().isEmpty()) {
             return properties.nickname;
         }
         return null;
     }
 
     public String getProfileImageUrl() {
-        if (kakaoAccount != null && kakaoAccount.profile != null) {
+        if (kakaoAccount != null && kakaoAccount.profile != null && kakaoAccount.profile.profileImageUrl != null && !kakaoAccount.profile.profileImageUrl.trim().isEmpty()) {
             return kakaoAccount.profile.profileImageUrl;
         }
-        if (properties != null) {
+        if (properties != null && properties.profileImage != null && !properties.profileImage.trim().isEmpty()) {
             return properties.profileImage;
         }
         return null;
