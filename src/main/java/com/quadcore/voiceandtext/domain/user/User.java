@@ -15,11 +15,17 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String password;
 
     @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(unique = true, length = 100)
+    private String kakaoId;
+
+    @Column(length = 255)
+    private String kakaoProfileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

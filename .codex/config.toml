@@ -1,7 +1,7 @@
 model = "gpt-5-codex"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 
-model_instructions_file = "instructions.md"
+model_instructions_file = ".codex/instructions.md"
 
 project_root_markers = [
     ".git",

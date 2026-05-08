@@ -3,7 +3,7 @@ name: Deploy VoiceAndText
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   deploy:
