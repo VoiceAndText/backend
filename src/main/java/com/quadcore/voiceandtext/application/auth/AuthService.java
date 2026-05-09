@@ -38,9 +38,9 @@ public class AuthService {
     /**
      * Kakao OAuth 로그인/회원가입
      */
-    public AuthResponse kakaoLogin(String kakaoAccessToken) {
+    public AuthResponse kakaoLogin(String authorizationCode) {
         // Kakao에서 사용자 정보 조회
-        KakaoUserInfoResponse kakaoUserInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
+        KakaoUserInfoResponse kakaoUserInfo = kakaoOAuthService.getUserInfoByCode(authorizationCode);
 
         if (kakaoUserInfo.getKakaoId() == null) {
             throw new BusinessException(
