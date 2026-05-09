@@ -4,12 +4,12 @@ import com.quadcore.voiceandtext.common.exception.BusinessException;
 import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import com.quadcore.voiceandtext.application.oauth.KakaoUserInfoPort;
 
@@ -59,12 +59,12 @@ public class KakaoOAuthService implements KakaoUserInfoPort {
             params.add("redirect_uri", kakaoRedirectUri);
             params.add("code", authorizationCode);
 
-            org.springframework.http.HttpEntity<MultiValueMap<String, String>> entity =
-                new org.springframework.http.HttpEntity<>(params, headers);
+            HttpEntity<MultiValueMap<String, String>> entity =
+                new HttpEntity<>(params, headers);
 
-            org.springframework.http.ResponseEntity<KakaoTokenResponse> response = restTemplate.exchange(
+            ResponseEntity<KakaoTokenResponse> response = restTemplate.exchange(
                     kakaoTokenUri,
-                    org.springframework.http.HttpMethod.POST,
+                    HttpMethod.POST,
                     entity,
                     KakaoTokenResponse.class
             );
@@ -84,8 +84,24 @@ public class KakaoOAuthService implements KakaoUserInfoPort {
                     ErrorCode.UNKNOWN_ERROR,
                     "카카오 토큰 발급에 실패했습니다."
             );
+        } catch (RestClientResponseException ex) {
+            HttpStatusCode status = ex.getStatusCode();
+            log.error("Failed to get access token from Kakao: status={}, statusText={}, responseBody={}",
+                    status.value(), status.getClass(), ex.getResponseBodyAsString(), ex);
+
+            if (status.is4xxClientError()) {
+                throw new BusinessException(
+                        ErrorCode.INVALID_REQUEST,
+                        "카카오 인가 코드가 잘못되었거나 토큰 요청이 유효하지 않습니다."
+                );
+            }
+
+            throw new BusinessException(
+                    ErrorCode.UNKNOWN_ERROR,
+                    "카카오 토큰 발급 중 오류가 발생했습니다."
+            );
         } catch (RestClientException ex) {
-            log.error("Failed to get access token from Kakao: {}", ex.getMessage());
+            log.error("Failed to get access token from Kakao: {}", ex.getMessage(), ex);
             throw new BusinessException(
                     ErrorCode.UNKNOWN_ERROR,
                     "카카오 토큰 발급 중 오류가 발생했습니다."
