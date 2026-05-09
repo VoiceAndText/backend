@@ -6,7 +6,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # 개발용
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
