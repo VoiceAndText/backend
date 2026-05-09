@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Builder
 @Schema(description = "카카오 로그인 요청 DTO")
 public class KakaoLoginRequest {
-    @NotBlank(message = "Access token cannot be null or blank")
-    @Schema(description = "카카오 Access Token", example = "ey1234567890abcdefg...")
-    private String accessToken;
+    @NotBlank(message = "Authorization code cannot be null or blank")
+    @Schema(description = "카카오 인가 코드", example = "abc123def456...")
+    private String code;
 }

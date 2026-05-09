@@ -2,6 +2,12 @@ spring:
   application:
     name: voiceandtext
 
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
+
 resttemplate:
   connect-timeout: 5000
   read-timeout: 10000

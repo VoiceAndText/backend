@@ -36,16 +36,16 @@ public class AuthController {
      * 카카오 로그인/회원가입
      */
     @PostMapping("/kakao-login")
-    @Operation(summary = "카카오 로그인/회원가입", description = "카카오 액세스 토큰을 사용하여 로그인 또는 회원가입합니다.")
+    @Operation(summary = "카카오 로그인/회원가입", description = "카카오 인가 코드를 사용하여 로그인 또는 회원가입합니다. OAuth2 Authorization Code Flow를 사용합니다.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인/회원가입 성공",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponse.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 - 액세스 토큰이 없거나 유효하지 않음"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 - 인가 코드가 없거나 유효하지 않음"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류")
     })
     public ResponseEntity<ApiResponse<AuthResponse>> kakaoLogin(
             @Valid @RequestBody KakaoLoginRequest request) {
-        AuthResponse response = authService.kakaoLogin(request.getAccessToken());
+        AuthResponse response = authService.kakaoLogin(request.getCode());
         return ResponseEntity.ok(ApiResponse.success("카카오 로그인에 성공했습니다.", response));
     }
 
