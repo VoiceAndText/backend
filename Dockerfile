@@ -13,9 +13,9 @@ RUN ./gradlew clean bootJar -x test
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-COPY --from=build /app/build/libs/*.jar app.jar
+RUN addgroup --system spring && adduser --system --ingroup spring spring
 
-RUN chown -R spring:spring /app
+COPY --from=build --chown=spring:spring /app/build/libs/*.jar app.jar
 
 USER spring
 
