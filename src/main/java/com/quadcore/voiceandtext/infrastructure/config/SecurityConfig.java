@@ -68,20 +68,27 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/",
+                    "/index.html",
                     "/health",
                     "/api/v1/auth/kakao-login",
                     "/api/v1/auth/token-refresh",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/static/**",
+                    "/public/**",
+                    "/webjars/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**"
                 ).permitAll()
                 // Protected endpoints
                 .requestMatchers(
                     "/api/v1/auth/logout",
                     "/api/v1/auth/withdraw"
                 ).authenticated()
-                // Other endpoints
-                .anyRequest().authenticated())
+                // All other endpoints - allow for non-authenticated users
+                .anyRequest().permitAll())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
