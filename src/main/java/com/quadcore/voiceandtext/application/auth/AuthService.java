@@ -5,7 +5,7 @@ import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.domain.user.User;
 import com.quadcore.voiceandtext.domain.user.UserRole;
 import com.quadcore.voiceandtext.domain.user.UserStatus;
-import com.quadcore.voiceandtext.infrastructure.oauth.KakaoOAuthService;
+import com.quadcore.voiceandtext.application.oauth.KakaoUserInfoPort;
 import com.quadcore.voiceandtext.infrastructure.oauth.KakaoUserInfoResponse;
 import com.quadcore.voiceandtext.infrastructure.security.JwtTokenProvider;
 import com.quadcore.voiceandtext.presentation.auth.dto.AuthResponse;
@@ -21,16 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final KakaoOAuthService kakaoOAuthService;
+    private final KakaoUserInfoPort kakaoUserInfoPort;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
 
     public AuthService(UserRepository userRepository,
-                       KakaoOAuthService kakaoOAuthService,
+                       KakaoUserInfoPort kakaoUserInfoPort,
                        JwtTokenProvider jwtTokenProvider,
                        TokenService tokenService) {
         this.userRepository = userRepository;
-        this.kakaoOAuthService = kakaoOAuthService;
+        this.kakaoUserInfoPort = kakaoUserInfoPort;
         this.jwtTokenProvider = jwtTokenProvider;
         this.tokenService = tokenService;
     }
@@ -40,7 +40,7 @@ public class AuthService {
      */
     public AuthResponse kakaoLogin(String authorizationCode) {
         // Kakao에서 사용자 정보 조회
-        KakaoUserInfoResponse kakaoUserInfo = kakaoOAuthService.getUserInfoByCode(authorizationCode);
+        KakaoUserInfoResponse kakaoUserInfo = kakaoUserInfoPort.getUserInfoByCode(authorizationCode);
 
         if (kakaoUserInfo.getKakaoId() == null) {
             throw new BusinessException(

@@ -11,10 +11,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import com.quadcore.voiceandtext.application.oauth.KakaoUserInfoPort;
 
 @Slf4j
 @Service
-public class KakaoOAuthService {
+public class KakaoOAuthService implements KakaoUserInfoPort {
 
     private final String kakaoClientId;
     private final String kakaoRedirectUri;
