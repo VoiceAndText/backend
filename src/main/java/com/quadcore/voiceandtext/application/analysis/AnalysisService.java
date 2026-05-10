@@ -25,6 +25,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * AnalysisRequest와 guestToken을 함께 반환하는 record
+ * guestToken은 원본 값 (응답에 사용), analysisRequest에는 tokenHash만 저장됨
+ */
+record AnalysisRequestWithToken(AnalysisRequest analysisRequest, String guestToken) {}
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -64,8 +70,10 @@ public class AnalysisService {
         User user = userId != null ? userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)) : null;
 
-        // AnalysisRequest 생성
-        AnalysisRequest analysisRequest = createAnalysisRequest(request, user);
+        // AnalysisRequest 생성 (guestToken 포함)
+        var resultWithToken = createAnalysisRequest(request, user);
+        AnalysisRequest analysisRequest = resultWithToken.analysisRequest();
+        String guestToken = resultWithToken.guestToken();
 
         // AnalysisRequest를 먼저 DB에 저장해서 ID 확정
         AnalysisRequest savedRequest = analysisRequestRepository.save(analysisRequest);
@@ -79,13 +87,13 @@ public class AnalysisService {
         // AudioFile 연결 후 다시 저장
         savedRequest = analysisRequestRepository.save(savedRequest);
 
-        // 응답 생성
+        // 응답 생성 (guestToken이 null이 아니면 포함)
         AudioUploadResponse response = AudioUploadResponse.builder()
                 .analysisRequestId(savedRequest.getId())
-                .guestResultToken(user == null ? generateGuestToken(savedRequest) : null)
+                .guestResultToken(guestToken)
                 .build();
 
-        // AI 서버 요청은 트랜잭션 완료 후 별도로 처리 (비동기 또는 다른 트랜잭션)
+        // AI 서버 요청은 트랜잭션 완료 후 별도로 처리
         requestAnalysisAsync(savedRequest);
 
         return response;
@@ -214,11 +222,16 @@ public class AnalysisService {
         return false;
     }
 
-    private AnalysisRequest createAnalysisRequest(AudioUploadRequest request, User user) {
+    /**
+     * AnalysisRequest와 guestToken을 함께 반환
+     * 비회원의 경우: guestToken 생성 → hash 저장, 원본 token은 record에 포함
+     * 회원의 경우: guestToken = null
+     */
+    private AnalysisRequestWithToken createAnalysisRequest(AudioUploadRequest request, User user) {
         String guestToken = user == null ? UUID.randomUUID().toString() : null;
         String guestTokenHash = guestToken != null ? hashToken(guestToken) : null;
 
-        return AnalysisRequest.builder()
+        AnalysisRequest analysisRequest = AnalysisRequest.builder()
                 .title("음성 분석 요청")
                 .description(request.getContext())
                 .user(user)
@@ -227,15 +240,15 @@ public class AnalysisService {
                 .guestResultTokenHash(guestTokenHash)
                 .expiresAt(user == null ? LocalDateTime.now().plusHours(guestExpiryHours) : null)
                 .build();
+
+        return new AnalysisRequestWithToken(analysisRequest, guestToken);
     }
 
-    private String generateGuestToken(AnalysisRequest request) {
-        // 실제로는 request.getGuestResultTokenHash()에서 복원 로직 필요하지만, 간단히 UUID 사용
-        return UUID.randomUUID().toString();
-    }
-
+    /**
+     * SHA-256를 사용한 토큰 해싱
+     * DB에는 hash만 저장되므로 원본 token은 복구 불가능
+     */
     private String hashToken(String token) {
-        // SHA-256 해싱 (실제 구현에서는 BCrypt 등 사용)
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(token.getBytes());
