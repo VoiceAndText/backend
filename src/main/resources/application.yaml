@@ -11,3 +11,25 @@ kakao:
 resttemplate:
   connect-timeout: 5000
   read-timeout: 10000
+
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+    region: ${AWS_REGION:ap-northeast-2}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL:http://localhost:8000}
+    timeout: 10000
+
+app:
+  audio:
+    max-file-size: 10485760 # 10MB
+    max-duration-seconds: 60
+    allowed-mime-types: audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4
+  guest:
+    expiry-hours: 24
+  cleanup:
+    interval: 3600000 # 1시간 (밀리초)
