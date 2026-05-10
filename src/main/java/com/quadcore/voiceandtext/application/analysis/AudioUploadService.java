@@ -6,6 +6,7 @@ import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
 import com.quadcore.voiceandtext.domain.file.AudioFile;
 import com.quadcore.voiceandtext.domain.file.FileSourceType;
 import com.quadcore.voiceandtext.domain.file.FileType;
+import com.quadcore.voiceandtext.infrastructure.analysis.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
