@@ -13,6 +13,7 @@ import com.quadcore.voiceandtext.presentation.analysis.dto.AudioUploadResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,26 +48,48 @@ public class AnalysisService {
         // AnalysisRequest에 AudioFile 연결
         analysisRequest.setAudioFile(audioFile);
 
-        // 저장
+        // DB에 저장 (트랜잭션 내부)
         AnalysisRequest savedRequest = analysisRequestRepository.save(analysisRequest);
 
-        // AI 서버 요청
-        try {
-            aiService.requestAnalysis(savedRequest);
-            savedRequest.setStatus(AnalysisStatus.PROCESSING);
-        } catch (Exception e) {
-            log.error("AI 서버 요청 실패: {}", e.getMessage());
-            savedRequest.setStatus(AnalysisStatus.FAILED);
-            savedRequest.setErrorMessage("AI 서버 요청 실패: " + e.getMessage());
-        }
-
-        analysisRequestRepository.save(savedRequest);
-
-        // 응답 생성
-        return AudioUploadResponse.builder()
+        // 응답 생성 (트랜잭션 내부에서 ID 필요)
+        AudioUploadResponse response = AudioUploadResponse.builder()
                 .analysisRequestId(savedRequest.getId())
                 .guestResultToken(user == null ? generateGuestToken(savedRequest) : null)
                 .build();
+
+        // AI 서버 요청은 트랜잭션 완료 후 별도로 처리 (비동기 또는 다른 트랜잭션)
+        requestAnalysisAsync(savedRequest);
+
+        return response;
+    }
+
+    /**
+     * AI 서버 요청을 트랜잭션 외부에서 처리
+     */
+    private void requestAnalysisAsync(AnalysisRequest analysisRequest) {
+        try {
+            aiService.requestAnalysis(analysisRequest);
+            updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.PROCESSING, null);
+        } catch (Exception e) {
+            log.error("AI 서버 요청 실패. analysisRequestId={}", analysisRequest.getId(), e);
+            updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.FAILED, "AI 서버 요청 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 분석 상태 업데이트 (REQUIRES_NEW로 새로운 트랜잭션 생성)
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateAnalysisStatusAfterAiRequest(Long analysisRequestId, AnalysisStatus status, String errorMessage) {
+        AnalysisRequest analysisRequest = analysisRequestRepository.findById(analysisRequestId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "분석 요청을 찾을 수 없습니다."));
+        
+        analysisRequest.setStatus(status);
+        if (errorMessage != null) {
+            analysisRequest.setErrorMessage(errorMessage);
+        }
+        
+        analysisRequestRepository.save(analysisRequest);
     }
 
     private void validateAudioFile(MultipartFile audio) {
