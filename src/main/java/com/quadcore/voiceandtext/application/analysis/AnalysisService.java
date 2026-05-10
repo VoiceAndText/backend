@@ -42,16 +42,19 @@ public class AnalysisService {
         // AnalysisRequest 생성
         AnalysisRequest analysisRequest = createAnalysisRequest(request, user);
 
-        // AudioFile 생성 및 S3 업로드
-        AudioFile audioFile = audioUploadService.uploadAudioFile(request.getAudio(), analysisRequest, request.getSourceType(), request.getDurationSeconds());
-
-        // AnalysisRequest에 AudioFile 연결
-        analysisRequest.setAudioFile(audioFile);
-
-        // DB에 저장 (트랜잭션 내부)
+        // AnalysisRequest를 먼저 DB에 저장해서 ID 확정
         AnalysisRequest savedRequest = analysisRequestRepository.save(analysisRequest);
 
-        // 응답 생성 (트랜잭션 내부에서 ID 필요)
+        // AudioFile 생성 및 S3 업로드 (ID가 확정된 savedRequest 사용)
+        AudioFile audioFile = audioUploadService.uploadAudioFile(request.getAudio(), savedRequest, request.getSourceType(), request.getDurationSeconds());
+
+        // AnalysisRequest에 AudioFile 연결
+        savedRequest.setAudioFile(audioFile);
+
+        // AudioFile 연결 후 다시 저장
+        savedRequest = analysisRequestRepository.save(savedRequest);
+
+        // 응답 생성
         AudioUploadResponse response = AudioUploadResponse.builder()
                 .analysisRequestId(savedRequest.getId())
                 .guestResultToken(user == null ? generateGuestToken(savedRequest) : null)
