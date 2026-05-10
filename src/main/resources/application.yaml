@@ -11,3 +11,15 @@ kakao:
 resttemplate:
   connect-timeout: 5000
   read-timeout: 10000
+
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+    region: ${AWS_REGION:ap-northeast-2}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL:http://localhost:8000}
+    timeout: 10000
