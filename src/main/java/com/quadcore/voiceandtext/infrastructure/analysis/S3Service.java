@@ -69,6 +69,7 @@ public class S3Service {
             log.info("파일 삭제 성공: {}", key);
         } catch (S3Exception e) {
             log.error("S3 삭제 실패: {}", e.getMessage());
+            throw new RuntimeException("Failed to delete S3 object: " + key, e);
         }
     }
 }
