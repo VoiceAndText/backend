@@ -53,11 +53,16 @@ public class AudioUploadService {
     }
 
     private String generateS3Key(AnalysisRequest analysisRequest, String storedFileName) {
-        if (analysisRequest.getIsGuest()) {
+        if (Boolean.TRUE.equals(analysisRequest.getIsGuest())) {
             return "temp/guest/audio/" + analysisRequest.getId() + "/" + storedFileName;
-        } else {
-            return "members/" + analysisRequest.getUser().getId() + "/audio/" + analysisRequest.getId() + "/" + storedFileName;
         }
+
+        if (analysisRequest.getUser() == null) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST,
+                    "Non-guest AnalysisRequest must have a user before generating S3 key.");
+        }
+
+        return "members/" + analysisRequest.getUser().getId() + "/audio/" + analysisRequest.getId() + "/" + storedFileName;
     }
 
     private String getFileExtension(String fileName) {
