@@ -1,12 +1,9 @@
 package com.quadcore.voiceandtext.application.analysis;
 
-import com.quadcore.voiceandtext.common.exception.BusinessException;
-import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
 import com.quadcore.voiceandtext.domain.file.AudioFile;
 import com.quadcore.voiceandtext.domain.file.FileSourceType;
 import com.quadcore.voiceandtext.domain.file.FileType;
-import com.quadcore.voiceandtext.infrastructure.analysis.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,15 +16,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AudioUploadService {
 
-    private final S3Service s3Service;
+    private final FileStoragePort fileStoragePort;
 
     public AudioFile uploadAudioFile(MultipartFile audio, AnalysisRequest analysisRequest, FileSourceType sourceType, Integer durationSeconds) {
         String originalFileName = audio.getOriginalFilename();
         String storedFileName = generateStoredFileName(analysisRequest, originalFileName);
         String s3Key = generateS3Key(analysisRequest, storedFileName);
 
-        // S3 업로드
-        String fileUrl = s3Service.uploadFile(audio, s3Key);
+        // 파일 스토리지 업로드
+        String fileUrl = fileStoragePort.uploadFile(audio, s3Key);
 
         // AudioFile 엔티티 생성
         return AudioFile.builder()

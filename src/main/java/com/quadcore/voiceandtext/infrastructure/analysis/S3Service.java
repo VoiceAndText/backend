@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import com.quadcore.voiceandtext.application.analysis.FileStoragePort;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -13,13 +14,12 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
-import java.net.URL;
 import java.time.Duration;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class S3Service implements FileStoragePort {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
