@@ -1,9 +1,11 @@
 package com.quadcore.voiceandtext.infrastructure.analysis;
 
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +18,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AiService {
 
-    private final RestTemplate restTemplate;
+    private final RestTemplateBuilder restTemplateBuilder;
+    private RestTemplate restTemplate;
     private final S3Service s3Service;
 
     @Value("${ai.server.url}")
@@ -24,6 +27,14 @@ public class AiService {
 
     @Value("${ai.server.timeout}")
     private int timeout;
+
+    @PostConstruct
+    private void init() {
+        this.restTemplate = restTemplateBuilder
+                .setConnectTimeout(Duration.ofMillis(timeout))
+                .setReadTimeout(Duration.ofMillis(timeout))
+                .build();
+    }
 
     public void requestAnalysis(AnalysisRequest analysisRequest) {
         String presignedUrl = s3Service.generatePresignedUrl(analysisRequest.getAudioFile().getStorageLocation(), Duration.ofMinutes(10));
