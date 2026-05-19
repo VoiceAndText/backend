@@ -1,5 +1,7 @@
 package com.quadcore.voiceandtext.application.analysis;
 
+import com.quadcore.voiceandtext.common.exception.BusinessException;
+import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
 import com.quadcore.voiceandtext.domain.file.AudioFile;
 import com.quadcore.voiceandtext.domain.file.FileSourceType;
@@ -19,6 +21,11 @@ public class AudioUploadService {
     private final FileStoragePort fileStoragePort;
 
     public AudioFile uploadAudioFile(MultipartFile audio, AnalysisRequest analysisRequest, FileSourceType sourceType, Integer durationSeconds) {
+        if (analysisRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST,
+                    "AnalysisRequest id must be assigned before calling uploadAudioFile. Persist the AnalysisRequest first before uploading the audio file.");
+        }
+
         String originalFileName = audio.getOriginalFilename();
         String storedFileName = generateStoredFileName(analysisRequest, originalFileName);
         String s3Key = generateS3Key(analysisRequest, storedFileName);
