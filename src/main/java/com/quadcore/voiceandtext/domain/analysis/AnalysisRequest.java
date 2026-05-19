@@ -53,6 +53,12 @@ public class AnalysisRequest extends BaseTimeEntity {
     @Column
     private Integer priority;
 
+    @Column(length = 255)
+    private String guestResultTokenHash;
+
+    @Column
+    private java.time.LocalDateTime expiresAt;
+
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 }
