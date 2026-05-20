@@ -124,15 +124,20 @@ public class AnalysisService {
     }
 
     private void saveAnalysisResult(AnalysisRequest analysisRequest, AiAnalysisResponse aiResponse) {
+        if (aiResponse == null || aiResponse.getData() == null || aiResponse.getData().getOverallAnalysis() == null) {
+            throw new RuntimeException("AI 서버 응답에 분석 결과가 없습니다.");
+        }
+
+        Double dissonanceIndex = getDissonanceIndexNullable(aiResponse);
         AnalysisResult analysisResult = AnalysisResult.builder()
-                .textEmotion(EmotionType.NEUTRAL)
-                .voiceEmotion(EmotionType.NEUTRAL)
-                .finalEmotion(EmotionType.NEUTRAL)
-                .textEmotionScore(0.0)
-                .voiceEmotionScore(0.0)
-                .mismatchScore(getDissonanceIndex(aiResponse))
+                .textEmotion(null)
+                .voiceEmotion(null)
+                .finalEmotion(null)
+                .textEmotionScore(null)
+                .voiceEmotionScore(null)
+                .mismatchScore(dissonanceIndex)
                 .primaryEmotion(getPrimaryEmotion(aiResponse))
-                .dissonanceIndex(getDissonanceIndexNullable(aiResponse))
+                .dissonanceIndex(dissonanceIndex)
                 .timeSeriesAnalysis(serializeTimeSeriesAnalysis(aiResponse))
                 .summaryExplanation(aiResponse.getMessage())
                 .build();

@@ -13,24 +13,24 @@ import lombok.*;
 @Builder
 public class AnalysisResult extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private EmotionType textEmotion;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private EmotionType voiceEmotion;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private EmotionType finalEmotion;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double textEmotionScore;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double voiceEmotionScore;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Double mismatchScore;
 
     @Column(length = 255)
