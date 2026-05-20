@@ -15,13 +15,11 @@ resttemplate:
 aws:
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME}
-    region: ${AWS_REGION:ap-northeast-2}
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region: ${AWS_REGION}
 
 ai:
   server:
-    url: ${AI_SERVER_URL:http://localhost:8000}
+    url: ${AI_SERVER_URL}
     timeout: 10000
 
 app:
