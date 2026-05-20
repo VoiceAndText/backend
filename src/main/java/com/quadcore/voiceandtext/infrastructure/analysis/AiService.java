@@ -1,6 +1,7 @@
 package com.quadcore.voiceandtext.infrastructure.analysis;
 
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
+import com.quadcore.voiceandtext.infrastructure.analysis.dto.AiAnalysisResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class AiService {
                 .build();
     }
 
-    public void requestAnalysis(AnalysisRequest analysisRequest) {
+    public AiAnalysisResponse requestAnalysis(AnalysisRequest analysisRequest) {
         String key = null;
         if (analysisRequest.getAudioFile() != null) {
             key = analysisRequest.getAudioFile().getStorageLocation();
@@ -67,20 +68,30 @@ public class AiService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<AiAnalysisResponse> response = restTemplate.exchange(
                     URI.create(aiServerUrl),
                     HttpMethod.POST,
                     entity,
-                    String.class
+                    AiAnalysisResponse.class
             );
 
-            if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            AiAnalysisResponse aiResponse = response.getBody();
+            if (!response.getStatusCode().equals(HttpStatus.OK) || aiResponse == null) {
                 log.error("AI 서버 요청 실패: analysisRequestId={}, status={}, body={}",
                         analysisRequest.getId(), response.getStatusCodeValue(), response.getBody());
                 throw new RuntimeException("AI 서버 요청 실패: " + response.getStatusCodeValue());
             }
 
+            log.info("AI 서버 응답: analysisRequestId={}, status={}, message={}",
+                    analysisRequest.getId(), aiResponse.getStatus(), aiResponse.getMessage());
+
+            if (!"success".equalsIgnoreCase(aiResponse.getStatus())) {
+                String message = aiResponse.getMessage() == null ? "AI 응답 실패" : aiResponse.getMessage();
+                throw new RuntimeException("AI 서버 응답 실패: " + message);
+            }
+
             log.info("AI 서버 요청 성공: {}", analysisRequest.getId());
+            return aiResponse;
         } catch (HttpStatusCodeException e) {
             log.error("AI 서버 요청 실패: analysisRequestId={}, status={}, responseBody={}",
                     analysisRequest.getId(), e.getRawStatusCode(), e.getResponseBodyAsString(), e);

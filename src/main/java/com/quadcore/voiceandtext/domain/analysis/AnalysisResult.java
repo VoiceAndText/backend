@@ -33,6 +33,15 @@ public class AnalysisResult extends BaseTimeEntity {
     @Column(nullable = false)
     private Double mismatchScore;
 
+    @Column(length = 255)
+    private String primaryEmotion;
+
+    @Column
+    private Double dissonanceIndex;
+
+    @Column(columnDefinition = "TEXT")
+    private String timeSeriesAnalysis;
+
     @Column(columnDefinition = "TEXT")
     private String summaryExplanation;
 
