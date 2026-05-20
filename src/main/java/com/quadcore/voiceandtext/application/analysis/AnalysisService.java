@@ -50,7 +50,7 @@ public class AnalysisService {
     @Value("${app.guest.expiry-hours:24}")
     private int guestExpiryHours;
 
-    @Value("${app.audio.allowed-mime-types:audio/mpeg,audio/wav,audio/ogg,audio/webm,audio/mp4}")
+    @Value("${app.audio.allowed-mime-types:audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/wave,audio/vnd.wave,audio/ogg,audio/webm,audio/mp4,video/mp4,audio/x-m4a,audio/aac,audio/x-aac,audio/flac,audio/x-flac}")
     private String allowedMimeTypesStr;
 
     private Set<String> allowedMimeTypes;
