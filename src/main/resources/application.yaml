@@ -31,3 +31,6 @@ app:
     expiry-hours: 24
   cleanup:
     interval: 3600000 # 1시간 (밀리초)
+
+server:
+  forward-headers-strategy: framework
