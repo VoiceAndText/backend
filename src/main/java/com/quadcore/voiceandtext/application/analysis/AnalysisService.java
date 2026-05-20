@@ -1,14 +1,19 @@
 package com.quadcore.voiceandtext.application.analysis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quadcore.voiceandtext.application.auth.UserRepository;
 import com.quadcore.voiceandtext.common.exception.BusinessException;
 import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
+import com.quadcore.voiceandtext.domain.analysis.AnalysisResult;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisStatus;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisType;
+import com.quadcore.voiceandtext.domain.analysis.EmotionType;
 import com.quadcore.voiceandtext.domain.file.AudioFile;
 import com.quadcore.voiceandtext.domain.user.User;
 import com.quadcore.voiceandtext.infrastructure.analysis.AiService;
+import com.quadcore.voiceandtext.infrastructure.analysis.dto.AiAnalysisResponse;
 import com.quadcore.voiceandtext.presentation.analysis.dto.AudioUploadRequest;
 import com.quadcore.voiceandtext.presentation.analysis.dto.AudioUploadResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +28,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -105,11 +112,70 @@ public class AnalysisService {
      */
     private void requestAnalysisAsync(AnalysisRequest analysisRequest) {
         try {
-            aiService.requestAnalysis(analysisRequest);
+            AiAnalysisResponse aiResponse = aiService.requestAnalysis(analysisRequest);
             updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.PROCESSING, null);
+            saveAnalysisResult(analysisRequest, aiResponse);
+            updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.COMPLETED, null);
         } catch (Exception e) {
-            log.error("AI 서버 요청 실패. analysisRequestId={}", analysisRequest.getId(), e);
-            updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.FAILED, "AI 서버 요청 중 오류가 발생했습니다.");
+            log.error("AI 서버 요청 실패. analysisRequestId={}, message={}", analysisRequest.getId(), e.getMessage(), e);
+            updateAnalysisStatusAfterAiRequest(analysisRequest.getId(), AnalysisStatus.FAILED,
+                    "AI 서버 요청 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    private void saveAnalysisResult(AnalysisRequest analysisRequest, AiAnalysisResponse aiResponse) {
+        if (aiResponse == null || aiResponse.getData() == null || aiResponse.getData().getOverallAnalysis() == null) {
+            throw new RuntimeException("AI 서버 응답에 분석 결과가 없습니다.");
+        }
+
+        Double dissonanceIndex = getDissonanceIndexNullable(aiResponse);
+        AnalysisResult analysisResult = AnalysisResult.builder()
+                .textEmotion(null)
+                .voiceEmotion(null)
+                .finalEmotion(null)
+                .textEmotionScore(null)
+                .voiceEmotionScore(null)
+                .mismatchScore(dissonanceIndex)
+                .primaryEmotion(getPrimaryEmotion(aiResponse))
+                .dissonanceIndex(dissonanceIndex)
+                .timeSeriesAnalysis(serializeTimeSeriesAnalysis(aiResponse))
+                .summaryExplanation(aiResponse.getMessage())
+                .build();
+
+        analysisRequest.setAnalysisResult(analysisResult);
+        analysisRequestRepository.save(analysisRequest);
+        log.info("AI 분석 결과 저장 완료: analysisRequestId={}", analysisRequest.getId());
+    }
+
+    private String getPrimaryEmotion(AiAnalysisResponse aiResponse) {
+        if (aiResponse == null || aiResponse.getData() == null || aiResponse.getData().getOverallAnalysis() == null) {
+            return null;
+        }
+        return aiResponse.getData().getOverallAnalysis().getPrimaryEmotion();
+    }
+
+    private Double getDissonanceIndex(AiAnalysisResponse aiResponse) {
+        Double dissonanceIndex = getDissonanceIndexNullable(aiResponse);
+        return dissonanceIndex != null ? dissonanceIndex : 0.0;
+    }
+
+    private Double getDissonanceIndexNullable(AiAnalysisResponse aiResponse) {
+        if (aiResponse == null || aiResponse.getData() == null || aiResponse.getData().getOverallAnalysis() == null) {
+            return null;
+        }
+        return aiResponse.getData().getOverallAnalysis().getDissonanceIndex();
+    }
+
+    private String serializeTimeSeriesAnalysis(AiAnalysisResponse aiResponse) {
+        if (aiResponse == null || aiResponse.getData() == null || aiResponse.getData().getTimeSeriesAnalysis() == null) {
+            return null;
+        }
+
+        try {
+            return new ObjectMapper().writeValueAsString(aiResponse.getData().getTimeSeriesAnalysis());
+        } catch (JsonProcessingException e) {
+            log.warn("timeSeriesAnalysis JSON 변환 실패: message={}", e.getMessage());
+            return null;
         }
     }
 
