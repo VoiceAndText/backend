@@ -80,6 +80,9 @@ jobs:
             KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
             KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
             KAKAO_USER_INFO_URI=https://kapi.kakao.com/v2/user/me
+            
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+
             EOF
 
             chmod 600 ~/voiceandtext/.env
