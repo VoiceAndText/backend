@@ -5,6 +5,7 @@ import com.quadcore.voiceandtext.common.exception.BusinessException;
 import com.quadcore.voiceandtext.common.exception.ErrorCode;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisStatus;
+import com.quadcore.voiceandtext.domain.analysis.AnalysisType;
 import com.quadcore.voiceandtext.domain.file.AudioFile;
 import com.quadcore.voiceandtext.domain.user.User;
 import com.quadcore.voiceandtext.infrastructure.analysis.AiService;
@@ -236,6 +237,7 @@ public class AnalysisService {
                 .description(request.getContext())
                 .user(user)
                 .isGuest(user == null)
+                .analysisType(AnalysisType.EMOTION)
                 .status(AnalysisStatus.PENDING)
                 .guestResultTokenHash(guestTokenHash)
                 .expiresAt(user == null ? LocalDateTime.now().plusHours(guestExpiryHours) : null)
