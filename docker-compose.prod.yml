@@ -14,3 +14,21 @@ services:
     image: redis:7-alpine
     container_name: voiceandtext-redis
     restart: always
+
+  caddy:
+    image: caddy:2
+    container_name: voiceandtext-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
