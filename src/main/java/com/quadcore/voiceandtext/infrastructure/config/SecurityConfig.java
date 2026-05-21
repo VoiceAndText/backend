@@ -47,7 +47,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder, @Value("${resttemplate.connect-timeout:5000}") int connectTimeout, @Value("${resttemplate.read-timeout:10000}") int readTimeout) {
+    public RestTemplate restTemplate(RestTemplateBuilder builder, @Value("${resttemplate.connect-timeout:5000}") int connectTimeout, @Value("${resttemplate.read-timeout:120000}") int readTimeout) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(connectTimeout);
         factory.setReadTimeout(readTimeout);
