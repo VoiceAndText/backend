@@ -15,7 +15,8 @@ public class GlobalExceptionHandler {
             ex.getMessage(),
             ex.getCause() != null ? ex.getCause().getMessage() : null
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        HttpStatus status = resolveHttpStatus(ex.getErrorCode());
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     @ExceptionHandler(Exception.class)
@@ -26,5 +27,15 @@ public class GlobalExceptionHandler {
             ex.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private HttpStatus resolveHttpStatus(ErrorCode errorCode) {
+        return switch (errorCode) {
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case RESOURCE_NOT_FOUND, USER_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
+            default -> HttpStatus.BAD_REQUEST;
+        };
     }
 }

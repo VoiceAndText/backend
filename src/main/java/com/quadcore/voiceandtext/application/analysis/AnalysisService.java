@@ -325,4 +325,52 @@ public class AnalysisService {
             throw new RuntimeException("토큰 해싱 실패", e);
         }
     }
+
+    @Transactional(readOnly = true)
+    public AnalysisRequest getAnalysisRequestForGuest(Long analysisRequestId, String guestResultToken) {
+        AnalysisRequest analysisRequest = getAnalysisRequestById(analysisRequestId);
+
+        if (!Boolean.TRUE.equals(analysisRequest.getIsGuest())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "비회원 결과 조회가 가능한 요청이 아닙니다.");
+        }
+
+        if (guestResultToken == null || guestResultToken.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "guestResultToken이 필요합니다.");
+        }
+
+        String givenTokenHash = hashToken(guestResultToken);
+        if (!givenTokenHash.equals(analysisRequest.getGuestResultTokenHash())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "토큰이 올바르지 않습니다.");
+        }
+
+        if (analysisRequest.getExpiresAt() != null && LocalDateTime.now().isAfter(analysisRequest.getExpiresAt())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "조회 기간이 만료되었습니다.");
+        }
+
+        return analysisRequest;
+    }
+
+    @Transactional(readOnly = true)
+    public AnalysisRequest getAnalysisRequestForUser(Long analysisRequestId, Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증이 필요합니다.");
+        }
+
+        AnalysisRequest analysisRequest = getAnalysisRequestById(analysisRequestId);
+
+        if (Boolean.TRUE.equals(analysisRequest.getIsGuest())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "회원 결과 조회가 가능한 요청이 아닙니다.");
+        }
+
+        if (analysisRequest.getUser() == null || analysisRequest.getUser().getId() == null || !analysisRequest.getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "본인의 분석 요청만 조회할 수 있습니다.");
+        }
+
+        return analysisRequest;
+    }
+
+    private AnalysisRequest getAnalysisRequestById(Long analysisRequestId) {
+        return analysisRequestRepository.findById(analysisRequestId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "분석 요청을 찾을 수 없습니다."));
+    }
 }
