@@ -164,7 +164,8 @@ public class AuthService {
     }
 
     /**
-     * 회원탈퇴 (Soft delete)
+     * 회원탈퇴: 카카오 연결 해제 + 개인정보 익명화
+     * kakaoId를 제거하므로 재가입 시 완전히 새 계정으로 처리됨
      */
     public void withdraw(Long userId) {
         User user = userRepository.findById(userId)
@@ -173,7 +174,19 @@ public class AuthService {
                         "사용자를 찾을 수 없습니다."
                 ));
 
+        // 카카오 연결 해제
+        if (user.getKakaoId() != null) {
+            kakaoUserInfoPort.unlinkUser(user.getKakaoId());
+        }
+
+        // 개인정보 익명화 (kakaoId 제거로 재가입 시 새 계정 생성)
         user.setStatus(UserStatus.INACTIVE);
+        user.setKakaoId(null);
+        user.setEmail("withdrawn_" + userId + "@deleted");
+        user.setName("탈퇴한 사용자");
+        user.setKakaoProfileImageUrl(null);
+        user.setProfileImageUrl(null);
+        user.setBio(null);
         userRepository.save(user);
 
         // 토큰 삭제

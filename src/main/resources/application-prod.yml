@@ -33,6 +33,7 @@ kakao:
     client-id: ${KAKAO_CLIENT_ID}
     user-info-uri: https://kapi.kakao.com/v2/user/me
     client-type: confidential
+  admin-key: ${KAKAO_ADMIN_KEY}
 
 # JWT Configuration
 jwt:

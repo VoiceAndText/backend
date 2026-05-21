@@ -21,6 +21,7 @@ public class KakaoOAuthService implements KakaoUserInfoPort {
     private final String kakaoRedirectUri;
     private final String kakaoTokenUri;
     private final String kakaoUserInfoUri;
+    private final String kakaoAdminKey;
     private final RestTemplate restTemplate;
 
     public KakaoOAuthService(
@@ -28,12 +29,44 @@ public class KakaoOAuthService implements KakaoUserInfoPort {
             @Value("${kakao.redirect-uri}") String kakaoRedirectUri,
             @Value("${kakao.token-uri}") String kakaoTokenUri,
             @Value("${kakao.user-info-uri}") String kakaoUserInfoUri,
+            @Value("${kakao.admin-key}") String kakaoAdminKey,
             RestTemplate restTemplate) {
         this.kakaoClientId = kakaoClientId;
         this.kakaoRedirectUri = kakaoRedirectUri;
         this.kakaoTokenUri = kakaoTokenUri;
         this.kakaoUserInfoUri = kakaoUserInfoUri;
+        this.kakaoAdminKey = kakaoAdminKey;
         this.restTemplate = restTemplate;
+    }
+
+    /**
+     * 카카오 계정과 앱 연결 해제 (회원탈퇴 시 호출)
+     */
+    @Override
+    public void unlinkUser(String kakaoId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "KakaoAK " + kakaoAdminKey);
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("target_id_type", "user_id");
+            params.add("target_id", kakaoId);
+
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
+            restTemplate.exchange(
+                    "https://kapi.kakao.com/v1/user/unlink",
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            log.info("Kakao unlink succeeded for kakaoId: {}", kakaoId);
+        } catch (RestClientException ex) {
+            // unlink 실패가 회원탈퇴를 막아서는 안 되므로 로그만 남김
+            log.error("Kakao unlink failed for kakaoId: {} - {}", kakaoId, ex.getMessage());
+        }
     }
 
     /**

@@ -4,4 +4,5 @@ import com.quadcore.voiceandtext.infrastructure.oauth.KakaoUserInfoResponse;
 
 public interface KakaoUserInfoPort {
     KakaoUserInfoResponse getUserInfoByCode(String authorizationCode);
+    void unlinkUser(String kakaoId);
 }

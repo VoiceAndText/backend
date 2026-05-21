@@ -77,6 +77,7 @@ jobs:
 
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_ADMIN_KEY=${{ secrets.KAKAO_ADMIN_KEY }}
             KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
             KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
             KAKAO_USER_INFO_URI=https://kapi.kakao.com/v2/user/me
