@@ -14,6 +14,10 @@ import java.util.Optional;
 interface SpringDataAnalysisRequestJpaRepository extends JpaRepository<AnalysisRequest, Long> {
     @Query("SELECT ar FROM AnalysisRequest ar WHERE ar.isGuest = true AND ar.expiresAt < :expiresAt")
     List<AnalysisRequest> findByIsGuestTrueAndExpiresAtBefore(@Param("expiresAt") LocalDateTime expiresAt);
+
+    List<AnalysisRequest> findAll();
+
+    List<AnalysisRequest> findByUser_Id(Long userId);
 }
 
 @Component
@@ -43,5 +47,15 @@ public class JpaAnalysisRequestRepository implements AnalysisRequestRepository {
     @Override
     public void delete(AnalysisRequest analysisRequest) {
         springDataRepository.delete(analysisRequest);
+    }
+
+    @Override
+    public List<AnalysisRequest> findAll() {
+        return springDataRepository.findAll();
+    }
+
+    @Override
+    public List<AnalysisRequest> findByUserId(Long userId) {
+        return springDataRepository.findByUser_Id(userId);
     }
 }

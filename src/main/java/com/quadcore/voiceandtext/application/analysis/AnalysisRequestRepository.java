@@ -11,4 +11,8 @@ public interface AnalysisRequestRepository {
     Optional<AnalysisRequest> findById(Long id);
     List<AnalysisRequest> findByIsGuestTrueAndExpiresAtBefore(LocalDateTime expiresAt);
     void delete(AnalysisRequest analysisRequest);
+
+    List<AnalysisRequest> findAll();
+
+    List<AnalysisRequest> findByUserId(Long userId);
 }

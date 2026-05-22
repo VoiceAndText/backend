@@ -40,4 +40,9 @@ public class JpaUserRepository implements UserRepository {
     public User save(User user) {
         return springDataUserJpaRepository.save(user);
     }
+
+    @Override
+    public java.util.List<User> findAll() {
+        return springDataUserJpaRepository.findAll();
+    }
 }

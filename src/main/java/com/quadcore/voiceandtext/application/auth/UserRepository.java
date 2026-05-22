@@ -3,6 +3,7 @@ package com.quadcore.voiceandtext.application.auth;
 import com.quadcore.voiceandtext.domain.user.User;
 
 import java.util.Optional;
+import java.util.List;
 
 /**
  * User 저장소 포트
@@ -35,6 +36,8 @@ public interface UserRepository {
      * @return 찾은 사용자, 없으면 빈 Optional
      */
     Optional<User> findById(Long id);
+
+    List<User> findAll();
 
     /**
      * 사용자를 저장합니다.
