@@ -13,10 +13,6 @@ kakao:
   token-uri: https://kauth.kakao.com/oauth/token
   user-info-uri: https://kapi.kakao.com/v2/user/me
 
-resttemplate:
-  connect-timeout: 5000
-  read-timeout: 120000
-
 aws:
   s3:
     bucket-name: ${AWS_S3_BUCKET_NAME}
@@ -25,7 +21,7 @@ aws:
 ai:
   server:
     url: ${AI_SERVER_URL}
-    timeout: 10000
+    timeout: 120000
 
 app:
   audio:

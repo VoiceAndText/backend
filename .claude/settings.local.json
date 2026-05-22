@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"RestTemplate\")",
+      "Bash(xargs grep -l \"@Async\")"
+    ]
+  }
+}
