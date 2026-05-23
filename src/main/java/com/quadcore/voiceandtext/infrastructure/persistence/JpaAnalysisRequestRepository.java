@@ -18,6 +18,10 @@ interface SpringDataAnalysisRequestJpaRepository extends JpaRepository<AnalysisR
     List<AnalysisRequest> findByIsGuestTrueAndExpiresAtBefore(@Param("expiresAt") LocalDateTime expiresAt);
 
     Page<AnalysisRequest> findByUser_Id(Long userId, Pageable pageable);
+
+    @Query(value = "SELECT ar FROM AnalysisRequest ar JOIN FETCH ar.audioFile WHERE ar.user.id = :userId",
+           countQuery = "SELECT COUNT(ar) FROM AnalysisRequest ar WHERE ar.user.id = :userId AND ar.audioFile IS NOT NULL")
+    Page<AnalysisRequest> findByUser_IdWithAudioFile(@Param("userId") Long userId, Pageable pageable);
 }
 
 @Component
@@ -57,5 +61,10 @@ public class JpaAnalysisRequestRepository implements AnalysisRequestRepository {
     @Override
     public Page<AnalysisRequest> findByUserId(Long userId, Pageable pageable) {
         return springDataRepository.findByUser_Id(userId, pageable);
+    }
+
+    @Override
+    public Page<AnalysisRequest> findByUserIdWithAudioFile(Long userId, Pageable pageable) {
+        return springDataRepository.findByUser_IdWithAudioFile(userId, pageable);
     }
 }
