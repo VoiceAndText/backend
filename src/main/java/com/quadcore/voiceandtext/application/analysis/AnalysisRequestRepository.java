@@ -1,6 +1,8 @@
 package com.quadcore.voiceandtext.application.analysis;
 
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +14,7 @@ public interface AnalysisRequestRepository {
     List<AnalysisRequest> findByIsGuestTrueAndExpiresAtBefore(LocalDateTime expiresAt);
     void delete(AnalysisRequest analysisRequest);
 
-    List<AnalysisRequest> findAll();
+    Page<AnalysisRequest> findAll(Pageable pageable);
 
-    List<AnalysisRequest> findByUserId(Long userId);
+    Page<AnalysisRequest> findByUserId(Long userId, Pageable pageable);
 }

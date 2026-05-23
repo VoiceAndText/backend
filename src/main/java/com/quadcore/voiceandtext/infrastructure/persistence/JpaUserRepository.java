@@ -2,6 +2,8 @@ package com.quadcore.voiceandtext.infrastructure.persistence;
 
 import com.quadcore.voiceandtext.application.auth.UserRepository;
 import com.quadcore.voiceandtext.domain.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -42,7 +44,7 @@ public class JpaUserRepository implements UserRepository {
     }
 
     @Override
-    public java.util.List<User> findAll() {
-        return springDataUserJpaRepository.findAll();
+    public Page<User> findAll(Pageable pageable) {
+        return springDataUserJpaRepository.findAll(pageable);
     }
 }

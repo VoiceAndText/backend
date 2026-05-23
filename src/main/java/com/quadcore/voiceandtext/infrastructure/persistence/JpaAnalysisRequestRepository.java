@@ -2,6 +2,8 @@ package com.quadcore.voiceandtext.infrastructure.persistence;
 
 import com.quadcore.voiceandtext.application.analysis.AnalysisRequestRepository;
 import com.quadcore.voiceandtext.domain.analysis.AnalysisRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,9 +17,7 @@ interface SpringDataAnalysisRequestJpaRepository extends JpaRepository<AnalysisR
     @Query("SELECT ar FROM AnalysisRequest ar WHERE ar.isGuest = true AND ar.expiresAt < :expiresAt")
     List<AnalysisRequest> findByIsGuestTrueAndExpiresAtBefore(@Param("expiresAt") LocalDateTime expiresAt);
 
-    List<AnalysisRequest> findAll();
-
-    List<AnalysisRequest> findByUser_Id(Long userId);
+    Page<AnalysisRequest> findByUser_Id(Long userId, Pageable pageable);
 }
 
 @Component
@@ -50,12 +50,12 @@ public class JpaAnalysisRequestRepository implements AnalysisRequestRepository {
     }
 
     @Override
-    public List<AnalysisRequest> findAll() {
-        return springDataRepository.findAll();
+    public Page<AnalysisRequest> findAll(Pageable pageable) {
+        return springDataRepository.findAll(pageable);
     }
 
     @Override
-    public List<AnalysisRequest> findByUserId(Long userId) {
-        return springDataRepository.findByUser_Id(userId);
+    public Page<AnalysisRequest> findByUserId(Long userId, Pageable pageable) {
+        return springDataRepository.findByUser_Id(userId, pageable);
     }
 }

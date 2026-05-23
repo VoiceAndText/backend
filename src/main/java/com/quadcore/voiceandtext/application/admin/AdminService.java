@@ -10,10 +10,10 @@ import com.quadcore.voiceandtext.domain.user.UserRole;
 import com.quadcore.voiceandtext.domain.user.UserStatus;
 import com.quadcore.voiceandtext.presentation.admin.dto.AnalysisLogResponse;
 import com.quadcore.voiceandtext.presentation.admin.dto.UserResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -37,20 +37,20 @@ public class AdminService {
         return me;
     }
 
-    public List<UserResponse> getAllUsers(Long currentUserId) {
+    public Page<UserResponse> getAllUsers(Long currentUserId, Pageable pageable) {
         requireAdmin(currentUserId);
-        return userRepository.findAll().stream().map(UserResponse::from).collect(Collectors.toList());
+        return userRepository.findAll(pageable).map(UserResponse::from);
     }
 
-    public List<AnalysisLogResponse> getAllLogs(Long currentUserId) {
+    public Page<AnalysisLogResponse> getAllLogs(Long currentUserId, Pageable pageable) {
         requireAdmin(currentUserId);
-        return analysisRequestRepository.findAll().stream().map(AnalysisLogResponse::from).collect(Collectors.toList());
+        return analysisRequestRepository.findAll(pageable).map(AnalysisLogResponse::from);
     }
 
-    public List<AnalysisLogResponse> getUserLogs(Long currentUserId, Long userId) {
+    public Page<AnalysisLogResponse> getUserLogs(Long currentUserId, Long userId, Pageable pageable) {
         requireAdmin(currentUserId);
         userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        return analysisRequestRepository.findByUserId(userId).stream().map(AnalysisLogResponse::from).collect(Collectors.toList());
+        return analysisRequestRepository.findByUserId(userId, pageable).map(AnalysisLogResponse::from);
     }
 
     public void updateUserStatus(Long currentUserId, Long userId, String statusStr) {

@@ -10,6 +10,9 @@ import com.quadcore.voiceandtext.presentation.admin.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -31,27 +34,34 @@ public class AdminController {
     @GetMapping("/users")
     @Operation(summary = "전체 사용자 조회", description = "관리자만 접근 가능")
     @SecurityRequirement(name = "bearer-jwt")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 20) Pageable pageable) {
         if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
-        List<UserResponse> users = adminService.getAllUsers(userId);
+        Page<UserResponse> users = adminService.getAllUsers(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
     @GetMapping("/logs")
     @Operation(summary = "전체 로그 조회", description = "관리자만 접근 가능")
     @SecurityRequirement(name = "bearer-jwt")
-    public ResponseEntity<ApiResponse<List<AnalysisLogResponse>>> getAllLogs(@AuthenticationPrincipal Long userId) {
+    public ResponseEntity<ApiResponse<Page<AnalysisLogResponse>>> getAllLogs(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 20) Pageable pageable) {
         if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
-        List<AnalysisLogResponse> logs = adminService.getAllLogs(userId);
+        Page<AnalysisLogResponse> logs = adminService.getAllLogs(userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(logs));
     }
 
     @GetMapping("/users/{userId}/logs")
     @Operation(summary = "사용자별 로그 조회", description = "관리자만 접근 가능")
     @SecurityRequirement(name = "bearer-jwt")
-    public ResponseEntity<ApiResponse<List<AnalysisLogResponse>>> getUserLogs(@AuthenticationPrincipal Long userId, @PathVariable("userId") Long userIdPath) {
+    public ResponseEntity<ApiResponse<Page<AnalysisLogResponse>>> getUserLogs(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable("userId") Long userIdPath,
+            @PageableDefault(size = 20) Pageable pageable) {
         if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
-        List<AnalysisLogResponse> logs = adminService.getUserLogs(userId, userIdPath);
+        Page<AnalysisLogResponse> logs = adminService.getUserLogs(userId, userIdPath, pageable);
         return ResponseEntity.ok(ApiResponse.success(logs));
     }
 

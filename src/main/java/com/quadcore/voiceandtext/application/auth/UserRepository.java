@@ -2,8 +2,10 @@ package com.quadcore.voiceandtext.application.auth;
 
 import com.quadcore.voiceandtext.domain.user.User;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.Optional;
-import java.util.List;
 
 /**
  * User 저장소 포트
@@ -37,7 +39,7 @@ public interface UserRepository {
      */
     Optional<User> findById(Long id);
 
-    List<User> findAll();
+    Page<User> findAll(Pageable pageable);
 
     /**
      * 사용자를 저장합니다.
