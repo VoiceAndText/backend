@@ -17,4 +17,6 @@ public interface AnalysisRequestRepository {
     Page<AnalysisRequest> findAll(Pageable pageable);
 
     Page<AnalysisRequest> findByUserId(Long userId, Pageable pageable);
+
+    Page<AnalysisRequest> findByUserIdWithAudioFile(Long userId, Pageable pageable);
 }
