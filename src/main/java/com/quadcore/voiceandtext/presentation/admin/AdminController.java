@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class AdminController {
     @PatchMapping("/users/{userId}/status")
     @Operation(summary = "사용자 상태 변경", description = "관리자만 접근 가능")
     @SecurityRequirement(name = "bearer-jwt")
-    public ResponseEntity<ApiResponse<Void>> updateUserStatus(@AuthenticationPrincipal Long userId, @PathVariable("userId") Long userIdPath, @RequestBody UpdateUserStatusRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateUserStatus(@AuthenticationPrincipal Long userId, @PathVariable("userId") Long userIdPath, @Valid @RequestBody UpdateUserStatusRequest request) {
         if (userId == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "인증 정보가 없습니다.");
         adminService.updateUserStatus(userId, userIdPath, request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("사용자 상태가 변경되었습니다."));

@@ -57,6 +57,9 @@ public class AdminService {
         User me = requireAdmin(currentUserId);
         User target = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         UserStatus newStatus;
+        if (statusStr == null || statusStr.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_USER_STATUS);
+        }
         try {
             newStatus = UserStatus.valueOf(statusStr.toUpperCase());
         } catch (IllegalArgumentException e) {

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class AnalysisLogResponse {
     private Long analysisRequestId;
     private Long userId;
+    private boolean isGuest;
     private AnalysisStatus status;
     private FileSourceType sourceType;
     private String errorMessage;
@@ -29,6 +30,7 @@ public class AnalysisLogResponse {
         return AnalysisLogResponse.builder()
                 .analysisRequestId(ar.getId())
                 .userId(ar.getUser() != null ? ar.getUser().getId() : null)
+                .isGuest(ar.getIsGuest())
                 .status(ar.getStatus())
                 .sourceType(sourceType)
                 .errorMessage(ar.getErrorMessage())
