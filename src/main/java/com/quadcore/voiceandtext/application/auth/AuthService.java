@@ -109,6 +109,7 @@ public class AuthService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
+                .role(user.getRole())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")

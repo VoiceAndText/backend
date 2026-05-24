@@ -1,5 +1,6 @@
 package com.quadcore.voiceandtext.presentation.auth.dto;
 
+import com.quadcore.voiceandtext.domain.user.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,13 +15,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class AuthResponse {
     @Schema(description = "사용자 ID", example = "1")
     private Long userId;
-    
+
     @Schema(description = "사용자 이메일", example = "user@example.com")
     private String email;
-    
+
     @Schema(description = "사용자 이름", example = "John Doe")
     private String name;
-    
+
+    @Schema(description = "사용자 권한", example = "USER")
+    private UserRole role;
+
     @Schema(description = "Access Token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
     private String accessToken;
     
